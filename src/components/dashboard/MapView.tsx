@@ -200,10 +200,6 @@ const MapView: React.FC = () => {
           </Marker>
         ))}
       </MapContainer>
-      {/* Andalas Label */}
-      <div className="absolute bottom-4 right-4 bg-white px-4 py-2 rounded-lg shadow text-sm font-semibold text-gray-700 z-[999]">
-        Andalas
-      </div>
     </div>
   );
 };

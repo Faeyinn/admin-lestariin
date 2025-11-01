@@ -29,7 +29,7 @@ const LaporanPage: React.FC = () => {
   const [apiReports, setApiReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
 
   // Fetch reports from API
   useEffect(() => {
@@ -57,10 +57,17 @@ const LaporanPage: React.FC = () => {
     fetchReports();
   }, []);
 
-  // Combine API reports with dummy data (keep two dummy)
+  // Combine API reports with dummy data (use all dummy, dedupe by id preferring API)
   const allReports = useMemo(() => {
-    const dummyToKeep = reportsData.slice(0, 2); // Keep first two dummy
-    return [...apiReports, ...dummyToKeep];
+    // apiReports first so they override dummy items with same id
+    const combined = [...apiReports, ...reportsData];
+    const seen = new Map<number, Report>();
+    for (const r of combined) {
+      if (!seen.has(r.id)) {
+        seen.set(r.id, r);
+      }
+    }
+    return Array.from(seen.values());
   }, [apiReports]);
 
   // Reset ke halaman 1 ketika search berubah

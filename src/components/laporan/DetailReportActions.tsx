@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { motion } from 'motion/react';
@@ -11,6 +11,8 @@ const DetailReportActions: React.FC<DetailReportActionsProps> = ({
   reportId,
 }) => {
   const navigate = useNavigate();
+  const [acted, setActed] = useState<boolean>(false);
+  const [status, setStatus] = useState<string>('Menunggu Verifikasi');
 
   const handleVerifikasi = () => {
     Swal.fire({
@@ -24,6 +26,8 @@ const DetailReportActions: React.FC<DetailReportActionsProps> = ({
       cancelButtonText: 'Batal',
     }).then((result) => {
       if (result.isConfirmed) {
+        setActed(true);
+        setStatus('Diverifikasi');
         Swal.fire({
           title: 'Terverifikasi!',
           text: 'Laporan berhasil diverifikasi.',
@@ -46,6 +50,7 @@ const DetailReportActions: React.FC<DetailReportActionsProps> = ({
       cancelButtonText: 'Batal',
     }).then((result) => {
       if (result.isConfirmed) {
+        setStatus('Verifikasi Ditolak');
         Swal.fire({
           title: 'Ditolak!',
           text: 'Laporan telah ditolak.',
@@ -70,18 +75,30 @@ const DetailReportActions: React.FC<DetailReportActionsProps> = ({
       >
         Kembali
       </button>
-      <button
-        onClick={handleVerifikasi}
-        className="w-full px-4 py-2.5 bg-green-500 text-white font-semibold rounded-lg shadow hover:bg-green-600 transition-colors"
-      >
-        Verifikasi
-      </button>
-      <button
-        onClick={handleTolak}
-        className="w-full px-4 py-2.5 bg-red-500 text-white font-semibold rounded-lg shadow hover:bg-red-600 transition-colors"
-      >
-        Tolak
-      </button>
+
+      {!acted ? (
+        <>
+          <button
+            onClick={handleVerifikasi}
+            className="w-full px-4 py-2.5 bg-green-500 text-white font-semibold rounded-lg shadow hover:bg-green-600 transition-colors"
+          >
+            Verifikasi
+          </button>
+          <button
+            onClick={handleTolak}
+            className="w-full px-4 py-2.5 bg-red-500 text-white font-semibold rounded-lg shadow hover:bg-red-600 transition-colors"
+          >
+            Tolak
+          </button>
+        </>
+      ) : (
+        <button
+          onClick={() => {}}
+          className="w-full px-4 py-2.5 bg-emerald-600 text-white font-semibold rounded-lg shadow cursor-default"
+        >
+          Ditindaklanjuti
+        </button>
+      )}
     </motion.div>
   );
 };
