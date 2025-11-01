@@ -7,11 +7,13 @@ import { motion } from 'motion/react';
 interface DetailReportContentProps {
   report: Report;
   position: [number, number];
+  onStatusChange?: (newStatus: string) => void;
 }
 
 const DetailReportContent: React.FC<DetailReportContentProps> = ({
   report,
   position,
+  onStatusChange,
 }) => {
   // Fungsi helper warna dari ReportCard Tuan
   const getCategoryColor = (cat: string) => {
@@ -34,13 +36,7 @@ const DetailReportContent: React.FC<DetailReportContentProps> = ({
   };
 
   return (
-    <motion.div
-      className="bg-white rounded-2xl shadow-xl p-4 md:p-6"
-      initial={{ opacity: 0, y: 12 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.5 }}
-    >
+    <div className="bg-white rounded-2xl shadow-xl p-4 md:p-6">
       <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
         {/* Kolom 1: Gambar (Lebih besar di desktop) */}
         <div className="lg:col-span-5">
@@ -53,7 +49,7 @@ const DetailReportContent: React.FC<DetailReportContentProps> = ({
 
         {/* Kolom 2: Detail (Peta, Info) */}
         <div className="lg:col-span-3 flex flex-col gap-4">
-          <DetailReportMap position={position} />
+          <DetailReportMap position={position} category={report.category} />
 
           {/* Info Pelapor */}
           <div className="text-right text-sm text-gray-500 -mt-2">
@@ -108,10 +104,10 @@ const DetailReportContent: React.FC<DetailReportContentProps> = ({
 
         {/* Kolom 3: Tombol Aksi */}
         <div className="lg:col-span-2">
-          <DetailReportActions reportId={report.id} />
+          <DetailReportActions reportId={report.id} onStatusChange={onStatusChange} />
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

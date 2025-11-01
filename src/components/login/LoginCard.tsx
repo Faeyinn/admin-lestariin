@@ -42,8 +42,8 @@ export const LoginCard: React.FC = () => {
 
       if (response.ok) {
         // Simpan access_token dan refresh_token di localStorage
-        localStorage.setItem('access_token', data.access_token);
-        localStorage.setItem('refresh_token', data.refresh_token);
+        localStorage.setItem('access_token', data.access);
+        localStorage.setItem('refresh_token', data.refresh);
         localStorage.setItem('isAuthenticated', 'true');
 
         Swal.fire({

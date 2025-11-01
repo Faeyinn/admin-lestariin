@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FileText, Trash2, Droplet, Axe, Flame, MessageSquare } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -7,52 +7,135 @@ import StatCard from '@/components/dashboard/StatCard';
 import MapView from '@/components/dashboard/MapView';
 import ChartCard from '@/components/dashboard/ChartCard';
 import WaterQualityCard from '@/components/dashboard/WaterQualityCard';
+import { API_ENDPOINTS } from '@/utils/apiConfig';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [apiReports, setApiReports] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const stats = [
-    {
-      title: 'Total Laporan',
-      subtitle: 'Total Laporan',
-      value: '450',
-      icon: FileText,
-      color: 'green',
-      delay: 0,
-    },
-    {
-      title: 'Sampah',
-      subtitle: 'Total Laporan',
-      value: '150',
-      icon: Trash2,
-      color: 'green',
-      delay: 100,
-    },
-    {
-      title: 'Kualitas Air',
-      subtitle: 'Total Laporan',
-      value: '100',
-      icon: Droplet,
-      color: 'green',
-      delay: 200,
-    },
-    {
-      title: 'Penebangan Hutan',
-      subtitle: 'Total Laporan',
-      value: '50',
-      icon: Axe,
-      color: 'green',
-      delay: 300,
-    },
-    {
-      title: 'Pembakaran Hutan',
-      subtitle: 'Total Laporan',
-      value: '50',
-      icon: Flame,
-      color: 'green',
-      delay: 400,
-    },
-  ];
+  // Fetch reports from API
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const token = localStorage.getItem('access_token');
+        const response = await fetch(API_ENDPOINTS.REPORTS_ALL, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setApiReports(data);
+        } else {
+          console.error('Failed to fetch reports for dashboard');
+        }
+      } catch (error) {
+        console.error('Error fetching reports for dashboard:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReports();
+  }, []);
+
+  // Calculate stats from API data
+  const stats = React.useMemo(() => {
+    if (loading) {
+      return [
+        {
+          title: 'Total Laporan',
+          subtitle: 'Total Laporan',
+          value: 'Loading...',
+          icon: FileText,
+          color: 'green',
+          delay: 0,
+        },
+        {
+          title: 'Sampah',
+          subtitle: 'Total Laporan',
+          value: 'Loading...',
+          icon: Trash2,
+          color: 'green',
+          delay: 100,
+        },
+        {
+          title: 'Kualitas Air',
+          subtitle: 'Total Laporan',
+          value: 'Loading...',
+          icon: Droplet,
+          color: 'green',
+          delay: 200,
+        },
+        {
+          title: 'Penebangan Hutan',
+          subtitle: 'Total Laporan',
+          value: 'Loading...',
+          icon: Axe,
+          color: 'green',
+          delay: 300,
+        },
+        {
+          title: 'Pembakaran Hutan',
+          subtitle: 'Total Laporan',
+          value: 'Loading...',
+          icon: Flame,
+          color: 'green',
+          delay: 400,
+        },
+      ];
+    }
+
+    const total = apiReports.length;
+    const sampah = apiReports.filter(r => r.trash_classification && r.trash_classification !== 'tidak_sampah').length;
+    const air = apiReports.filter(r => r.water_classification && r.water_classification !== 'Air_bersih').length;
+    const penebangan = apiReports.filter(r => r.illegal_logging_classification && r.illegal_logging_classification !== 'tidak_penebangan_liar').length;
+    const kebakaran = apiReports.filter(r => r.public_fire_classification && r.public_fire_classification !== 'no_fire').length;
+
+    return [
+      {
+        title: 'Total Laporan',
+        subtitle: 'Total Laporan',
+        value: total.toString(),
+        icon: FileText,
+        color: 'green',
+        delay: 0,
+      },
+      {
+        title: 'Sampah',
+        subtitle: 'Total Laporan',
+        value: sampah.toString(),
+        icon: Trash2,
+        color: 'green',
+        delay: 100,
+      },
+      {
+        title: 'Kualitas Air',
+        subtitle: 'Total Laporan',
+        value: air.toString(),
+        icon: Droplet,
+        color: 'green',
+        delay: 200,
+      },
+      {
+        title: 'Penebangan Hutan',
+        subtitle: 'Total Laporan',
+        value: penebangan.toString(),
+        icon: Axe,
+        color: 'green',
+        delay: 300,
+      },
+      {
+        title: 'Pembakaran Hutan',
+        subtitle: 'Total Laporan',
+        value: kebakaran.toString(),
+        icon: Flame,
+        color: 'green',
+        delay: 400,
+      },
+    ];
+  }, [apiReports, loading]);
 
   return (
     <div className="flex h-screen bg-linear-to-br from-green-50 via-cyan-50 to-blue-50 overflow-hidden">

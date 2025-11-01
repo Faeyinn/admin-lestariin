@@ -8,6 +8,8 @@ export interface Report {
   description: string;
   author: string;
   date: string;
+  latitude?: number;
+  longitude?: number;
   acted?: boolean; // optional flag: telah ditindaklanjuti oleh petugas
 }
 

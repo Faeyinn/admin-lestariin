@@ -5,6 +5,26 @@ import L, { type LatLngExpression } from 'leaflet';
 import { Trash2, Flame, Droplet, User } from 'lucide-react';
 import { API_ENDPOINTS } from '@/utils/apiConfig';
 import type { Report } from '@/utils/reportData';
+
+// API Report interface
+interface ApiReport {
+  id: number;
+  image_url: string;
+  description: string;
+  latitude: number;
+  longitude: number;
+  water_classification: string;
+  forest_classification: string;
+  public_fire_classification: string;
+  trash_classification: string;
+  illegal_logging_classification: string;
+  verified: boolean;
+  created_at: string;
+  user: {
+    email: string;
+    name: string;
+  };
+}
 // Custom icon generator for Lucide icons
 const createLucideIcon = (icon: React.ReactElement, bg: string) => {
   const svg = renderToStaticMarkup(icon);
@@ -19,74 +39,6 @@ const createLucideIcon = (icon: React.ReactElement, bg: string) => {
   });
 };
 
-const markerData = [
-  {
-    id: 1,
-    type: 'fire',
-    position: [-0.914, 100.460],
-    title: 'Pembakaran Hutan',
-    description: 'Area pembakaran',
-    color: '#ef4444',
-    icon: <Flame size={20} />,
-  },
-  {
-    id: 2,
-    type: 'fire',
-    position: [-0.916, 100.465],
-    title: 'Titik Api',
-    description: 'Hotspot terdeteksi',
-    color: '#ef4444',
-    icon: <Flame size={20} />,
-  },
-  {
-    id: 3,
-    type: 'trash',
-    position: [-0.912, 100.462],
-    title: 'Sampah',
-    description: 'Belum dikonfirmasi',
-    date: '01 Nov 2025',
-    image: 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=400',
-    color: '#22c55e',
-    icon: <Trash2 size={20} />,
-  },
-  {
-    id: 4,
-    type: 'trash',
-    position: [-0.915, 100.468],
-    title: 'TPS',
-    description: 'Tempat pengumpulan',
-    color: '#22c55e',
-    icon: <Trash2 size={20} />,
-  },
-  {
-    id: 5,
-    type: 'trash',
-    position: [-0.917, 100.461],
-    title: 'Bank Sampah',
-    description: 'Aktif',
-    color: '#22c55e',
-    icon: <Trash2 size={20} />,
-  },
-  {
-    id: 6,
-    type: 'water',
-    position: [-0.913, 100.467],
-    title: 'Kualitas Air Bagus',
-    description: 'pH Normal',
-    color: '#3b82f6',
-    icon: <Droplet size={20} />,
-  },
-  {
-    id: 7,
-    type: 'user',
-    position: [-0.9145, 100.464],
-    title: 'Lokasi Saya',
-    description: 'Current position',
-    color: '#2563eb',
-    icon: <User size={20} />,
-  },
-];
-
 const heatmapCircles = [
   // Example: [lat, lng, color, radius]
   [-0.914, 100.460, '#ef4444', 300],
@@ -96,13 +48,17 @@ const heatmapCircles = [
 
 const MapView: React.FC = () => {
   const [selectedMarker, setSelectedMarker] = useState<number | null>(null);
-  const [apiReports, setApiReports] = useState<Report[]>([]);
+  const [apiReports, setApiReports] = useState<ApiReport[]>([]);
 
   // Fetch reports from API for map markers
   useEffect(() => {
     const fetchReports = async () => {
       try {
         const token = localStorage.getItem('access_token');
+        if (!token) {
+          console.error('No access token found');
+          return;
+        }
         const response = await fetch(API_ENDPOINTS.REPORTS_ALL, {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -111,9 +67,10 @@ const MapView: React.FC = () => {
         });
         if (response.ok) {
           const data = await response.json();
+          console.log('Map reports data:', data); // Debug log
           setApiReports(data);
         } else {
-          console.error('Failed to fetch reports for map');
+          console.error('Failed to fetch reports for map:', response.status, response.statusText);
         }
       } catch (error) {
         console.error('Error fetching reports for map:', error);
@@ -122,21 +79,49 @@ const MapView: React.FC = () => {
     fetchReports();
   }, []);
 
-  // Create markers from API reports (assuming location has lat,lng or geocode)
-  const apiMarkers = apiReports.map((report) => ({
-    id: report.id,
-    type: 'report',
-    position: [-0.914 + Math.random() * 0.01, 100.464 + Math.random() * 0.01], // Placeholder, replace with actual coords
-    title: report.category,
-    description: report.description,
-    date: report.date,
-    image: report.image,
-    color: '#22c55e',
-    icon: <Trash2 size={20} />,
-  }));
+  // Create markers from API reports (using actual lat,lng from API)
+  const apiMarkers = apiReports.map((report) => {
+    // Determine category and icon based on classifications
+    let category = 'Laporan';
+    let color = '#22c55e';
+    let icon = <Trash2 size={20} />;
 
-  // Combine API markers with dummy markers
-  const allMarkers = [...markerData, ...apiMarkers];
+    // Check classifications in priority order
+    if (report.public_fire_classification && report.public_fire_classification !== 'no_fire') {
+      category = 'Pembakaran Hutan';
+      color = '#ef4444';
+      icon = <Flame size={20} color="white" />;
+    } else if (report.illegal_logging_classification && report.illegal_logging_classification !== 'tidak_penebangan_liar') {
+      category = 'Penebangan Hutan';
+      color = '#f59e0b';
+      icon = <User size={20} color="white" />; // Using User as placeholder for logging icon
+    } else if (report.water_classification && report.water_classification !== 'Air_bersih') {
+      category = 'Kualitas Air';
+      color = '#3b82f6';
+      icon = <Droplet size={20} color="white" />;
+    } else if (report.trash_classification && report.trash_classification !== 'tidak_sampah') {
+      category = 'Sampah';
+      color = '#22c55e';
+      icon = <Trash2 size={20} color="white" />;
+    }
+
+    return {
+      id: report.id,
+      type: 'report',
+      position: [report.latitude, report.longitude], // Use actual coordinates from API
+      title: category,
+      description: report.description,
+      date: report.created_at ? new Date(report.created_at).toLocaleDateString('id-ID') : '',
+      image: report.image_url,
+      color: color,
+      icon: icon,
+      verified: report.verified,
+      user: report.user.name,
+    };
+  });
+
+  // Use only API markers (no dummy data)
+  const allMarkers = apiMarkers;
 
   return (
     <div className="relative w-full h-full rounded-2xl overflow-hidden">
@@ -193,6 +178,14 @@ const MapView: React.FC = () => {
                   <div className="text-xs text-gray-600">{marker.description}</div>
                   {marker.date && (
                     <div className="text-xs text-gray-400 mt-1">{marker.date}</div>
+                  )}
+                  {marker.user && (
+                    <div className="text-xs text-gray-500 mt-1">Oleh: {marker.user}</div>
+                  )}
+                  {marker.verified !== undefined && (
+                    <div className={`text-xs mt-1 ${marker.verified ? 'text-green-600' : 'text-yellow-600'}`}>
+                      {marker.verified ? '✓ Terverifikasi' : '⏳ Menunggu Verifikasi'}
+                    </div>
                   )}
                 </div>
               </Popup>

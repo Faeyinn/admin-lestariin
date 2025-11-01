@@ -11,7 +11,6 @@ import Pagination from "@/components/laporan/Pagination";
 import FilterModal, {
   type FilterState,
 } from "@/components/laporan/FilterModal";
-import { reportsData } from "@/utils/reportData";
 import { API_ENDPOINTS } from "@/utils/apiConfig";
 import type { Report } from "@/utils/reportData";
 
@@ -44,7 +43,26 @@ const LaporanPage: React.FC = () => {
         });
         if (response.ok) {
           const data = await response.json();
-          setApiReports(data);
+          // Transform API data to match Report interface
+          const transformedData = data.map((item: any) => ({
+            id: item.id,
+            image: item.image_url,
+            status: item.verified ? 'Diverifikasi' : 'Menunggu Verifikasi',
+            category: item.water_classification || item.forest_classification || item.trash_classification || 'Lainnya',
+            tags: [
+              item.water_classification ? `Air: ${item.water_classification}` : null,
+              item.forest_classification ? `Hutan: ${item.forest_classification}` : null,
+              item.public_fire_classification ? `Kebakaran: ${item.public_fire_classification}` : null,
+              item.trash_classification ? `Sampah: ${item.trash_classification}` : null,
+              item.illegal_logging_classification ? `Penebangan: ${item.illegal_logging_classification}` : null,
+            ].filter(Boolean),
+            location: `${item.latitude}, ${item.longitude}`,
+            description: item.description,
+            author: item.user.name,
+            date: new Date(item.created_at).toLocaleDateString('id-ID'),
+            acted: item.verified
+          }));
+          setApiReports(transformedData);
         } else {
           console.error('Failed to fetch reports');
         }
@@ -57,17 +75,9 @@ const LaporanPage: React.FC = () => {
     fetchReports();
   }, []);
 
-  // Combine API reports with dummy data (use all dummy, dedupe by id preferring API)
+  // Use only API reports for real backend data
   const allReports = useMemo(() => {
-    // apiReports first so they override dummy items with same id
-    const combined = [...apiReports, ...reportsData];
-    const seen = new Map<number, Report>();
-    for (const r of combined) {
-      if (!seen.has(r.id)) {
-        seen.set(r.id, r);
-      }
-    }
-    return Array.from(seen.values());
+    return apiReports;
   }, [apiReports]);
 
   // Reset ke halaman 1 ketika search berubah

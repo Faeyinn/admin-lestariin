@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { motion } from 'motion/react';
+import { API_ENDPOINTS } from '@/utils/apiConfig';
 
 interface ReportCardProps {
   id: number;
@@ -54,8 +55,16 @@ const ReportCard: React.FC<ReportCardProps> = ({
     return 'bg-gray-100 text-gray-700';
   };
 
-  const handleVerifikasi = (e?: React.MouseEvent) => {
+  const handleVerifikasi = async (e?: React.MouseEvent) => {
     e?.stopPropagation();
+
+    // Check if user is admin (you might need to store admin status in localStorage or check token)
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      Swal.fire('Error', 'Anda tidak memiliki akses.', 'error');
+      return;
+    }
+
     Swal.fire({
       title: 'Verifikasi Laporan',
       text: `Konfirmasi verifikasi laporan #${id}?`,
@@ -64,11 +73,30 @@ const ReportCard: React.FC<ReportCardProps> = ({
       confirmButtonText: 'Ya, Verifikasi',
       cancelButtonText: 'Batal',
       confirmButtonColor: '#22c55e',
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        setIsActed(true);
-        setLocalStatus('Diverifikasi');
-        Swal.fire('Terverifikasi', 'Laporan telah diverifikasi.', 'success');
+        try {
+          const response = await fetch(`${API_ENDPOINTS.REPORTS_VERIFY}${id}/`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            setIsActed(true);
+            setLocalStatus('Diverifikasi');
+            Swal.fire('Terverifikasi', `Laporan telah diverifikasi. ${data.message}`, 'success');
+          } else {
+            const errorData = await response.json();
+            Swal.fire('Error', errorData.error || 'Gagal memverifikasi laporan.', 'error');
+          }
+        } catch (error) {
+          console.error('Error verifying report:', error);
+          Swal.fire('Error', 'Terjadi kesalahan saat memverifikasi laporan.', 'error');
+        }
       }
     });
   };

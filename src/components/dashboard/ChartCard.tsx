@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   XAxis,
   YAxis,
@@ -9,59 +9,125 @@ import {
   AreaChart,
 } from "recharts";
 import { motion } from "motion/react";
+import { API_ENDPOINTS } from "@/utils/apiConfig";
 
 const ChartCard: React.FC = () => {
-  const data = [
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchChartData = async () => {
+      try {
+        const token = localStorage.getItem('access_token');
+        const response = await fetch(API_ENDPOINTS.REPORTS_ALL, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        if (response.ok) {
+          const reports = await response.json();
+
+          // Group reports by day of week
+          const dayGroups: { [key: string]: any } = {
+            'Senin': { Sampah: 0, 'Kualitas Air': 0, 'Penebangan Hutan': 0, 'Pembakaran Hutan': 0 },
+            'Selasa': { Sampah: 0, 'Kualitas Air': 0, 'Penebangan Hutan': 0, 'Pembakaran Hutan': 0 },
+            'Rabu': { Sampah: 0, 'Kualitas Air': 0, 'Penebangan Hutan': 0, 'Pembakaran Hutan': 0 },
+            'Kamis': { Sampah: 0, 'Kualitas Air': 0, 'Penebangan Hutan': 0, 'Pembakaran Hutan': 0 },
+            'Jumat': { Sampah: 0, 'Kualitas Air': 0, 'Penebangan Hutan': 0, 'Pembakaran Hutan': 0 },
+            'Sabtu': { Sampah: 0, 'Kualitas Air': 0, 'Penebangan Hutan': 0, 'Pembakaran Hutan': 0 },
+            'Minggu': { Sampah: 0, 'Kualitas Air': 0, 'Penebangan Hutan': 0, 'Pembakaran Hutan': 0 },
+          };
+
+          const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+
+          reports.forEach((report: any) => {
+            const date = new Date(report.created_at);
+            const dayName = dayNames[date.getDay()];
+
+            if (report.trash_classification && report.trash_classification !== 'tidak_sampah') {
+              dayGroups[dayName].Sampah += 1;
+            }
+            if (report.water_classification && report.water_classification !== 'Air_bersih') {
+              dayGroups[dayName]['Kualitas Air'] += 1;
+            }
+            if (report.illegal_logging_classification && report.illegal_logging_classification !== 'tidak_penebangan_liar') {
+              dayGroups[dayName]['Penebangan Hutan'] += 1;
+            }
+            if (report.public_fire_classification && report.public_fire_classification !== 'no_fire') {
+              dayGroups[dayName]['Pembakaran Hutan'] += 1;
+            }
+          });
+
+          const data = Object.keys(dayGroups).map(day => ({
+            month: day,
+            ...dayGroups[day]
+          }));
+
+          setChartData(data);
+        } else {
+          console.error('Failed to fetch reports for chart');
+        }
+      } catch (error) {
+        console.error('Error fetching reports for chart:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchChartData();
+  }, []);
+
+  const data = loading ? [
     {
       month: "Senin",
-      Sampah: 30,
-      "Kualitas Air": 20,
-      "Penebangan Hutan": 15,
-      "Pembakaran Hutan": 10,
+      Sampah: 0,
+      "Kualitas Air": 0,
+      "Penebangan Hutan": 0,
+      "Pembakaran Hutan": 0,
     },
     {
       month: "Selasa",
-      Sampah: 35,
-      "Kualitas Air": 25,
-      "Penebangan Hutan": 18,
-      "Pembakaran Hutan": 12,
+      Sampah: 0,
+      "Kualitas Air": 0,
+      "Penebangan Hutan": 0,
+      "Pembakaran Hutan": 0,
     },
     {
       month: "Rabu",
-      Sampah: 45,
-      "Kualitas Air": 40,
-      "Penebangan Hutan": 22,
-      "Pembakaran Hutan": 15,
+      Sampah: 0,
+      "Kualitas Air": 0,
+      "Penebangan Hutan": 0,
+      "Pembakaran Hutan": 0,
     },
     {
       month: "Kamis",
-      Sampah: 55,
-      "Kualitas Air": 45,
-      "Penebangan Hutan": 28,
-      "Pembakaran Hutan": 20,
+      Sampah: 0,
+      "Kualitas Air": 0,
+      "Penebangan Hutan": 0,
+      "Pembakaran Hutan": 0,
     },
     {
       month: "Jumat",
-      Sampah: 70,
-      "Kualitas Air": 35,
-      "Penebangan Hutan": 25,
-      "Pembakaran Hutan": 18,
+      Sampah: 0,
+      "Kualitas Air": 0,
+      "Penebangan Hutan": 0,
+      "Pembakaran Hutan": 0,
     },
     {
       month: "Sabtu",
-      Sampah: 50,
-      "Kualitas Air": 30,
-      "Penebangan Hutan": 20,
-      "Pembakaran Hutan": 14,
+      Sampah: 0,
+      "Kualitas Air": 0,
+      "Penebangan Hutan": 0,
+      "Pembakaran Hutan": 0,
     },
     {
       month: "Minggu",
-      Sampah: 45,
-      "Kualitas Air": 28,
-      "Penebangan Hutan": 18,
-      "Pembakaran Hutan": 12,
+      Sampah: 0,
+      "Kualitas Air": 0,
+      "Penebangan Hutan": 0,
+      "Pembakaran Hutan": 0,
     },
-  ];
+  ] : chartData;
 
   return (
     <motion.div

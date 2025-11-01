@@ -12,6 +12,18 @@ import LaporanPage from "./pages/LaporanPage"
 import DetailLaporanPage from "./pages/DetailLaporan"
 import ChatbotPage from "./pages/ChatbotPage"
 
+// Protected Route Component
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+  const accessToken = localStorage.getItem('access_token');
+
+  if (!isAuthenticated || !accessToken) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+};
+
 export default function App() {
   useEffect(() => {
       AOS.init({
@@ -27,11 +39,11 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/laporan" element={<LaporanPage />} />
-        <Route path="/laporan/:id" element={<DetailLaporanPage />} /> 
-        <Route path="/chatbot" element={<ChatbotPage />} />
-        
+        <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+        <Route path="/laporan" element={<ProtectedRoute><LaporanPage /></ProtectedRoute>} />
+        <Route path="/laporan/:id" element={<ProtectedRoute><DetailLaporanPage /></ProtectedRoute>} />
+        <Route path="/chatbot" element={<ProtectedRoute><ChatbotPage /></ProtectedRoute>} />
+
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>
