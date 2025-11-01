@@ -35,36 +35,6 @@ const ChatInterface: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [isLoading, setIsLoading] = useState(false);
 
-  const _refreshToken = async (): Promise<string | null> => {
-    const refreshToken = localStorage.getItem('refresh_token');
-    if (!refreshToken) return null;
-
-    try {
-      const response = await fetch(API_ENDPOINTS.TOKEN_REFRESH, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          refresh: refreshToken,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem('access_token', data.access);
-        return data.access;
-      } else {
-        console.log('Token refresh failed:', data);
-        return null;
-      }
-    } catch (error) {
-      console.error('Token refresh error:', error);
-      return null;
-    }
-  };
-
   const handleSend = async (text: string) => {
     // 1. Tambahkan pesan user
     const userMessage: Message = {
