@@ -26,7 +26,7 @@ const LaporanPage: React.FC = () => {
     dateTo: "",
   });
   const [apiReports, setApiReports] = useState<Report[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
 
   const itemsPerPage = 5;
 
