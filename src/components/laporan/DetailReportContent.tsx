@@ -2,7 +2,6 @@ import React from 'react';
 import { type Report } from '@/utils/reportData';
 import DetailReportMap from './DetailReportMap';
 import DetailReportActions from './DetailReportActions';
-import { motion } from 'motion/react';
 
 interface DetailReportContentProps {
   report: Report;
