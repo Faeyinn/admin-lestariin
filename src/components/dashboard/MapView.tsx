@@ -4,7 +4,6 @@ import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import L, { type LatLngExpression } from 'leaflet';
 import { Trash2, Flame, Droplet, User } from 'lucide-react';
 import { API_ENDPOINTS } from '@/utils/apiConfig';
-import type { _Report } from '@/utils/reportData';
 
 // API Report interface
 interface ApiReport {
