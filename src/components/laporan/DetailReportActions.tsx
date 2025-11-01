@@ -14,8 +14,8 @@ const DetailReportActions: React.FC<DetailReportActionsProps> = ({
 }) => {
   const navigate = useNavigate();
   const [acted, setActed] = useState<boolean>(false);
-  const [status, setStatus] = useState<string>('Menunggu Verifikasi');
-  const [loading, setLoading] = useState<boolean>(false);
+  const [_status, setStatus] = useState<string>('Menunggu Verifikasi');
+  const [_loading, setLoading] = useState<boolean>(false);
 
   const handleVerifikasi = async () => {
     const result = await Swal.fire({
