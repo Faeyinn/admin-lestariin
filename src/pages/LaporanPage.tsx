@@ -11,6 +11,8 @@ import FilterModal, {
   type FilterState,
 } from "@/components/laporan/FilterModal";
 import { reportsData } from "@/utils/reportData";
+import { API_ENDPOINTS } from "@/utils/apiConfig";
+import type { Report } from "@/utils/reportData";
 
 const LaporanPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -23,8 +25,42 @@ const LaporanPage: React.FC = () => {
     dateFrom: "",
     dateTo: "",
   });
+  const [apiReports, setApiReports] = useState<Report[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const itemsPerPage = 10;
+
+  // Fetch reports from API
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const token = localStorage.getItem('access_token');
+        const response = await fetch(API_ENDPOINTS.REPORTS_ALL, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setApiReports(data);
+        } else {
+          console.error('Failed to fetch reports');
+        }
+      } catch (error) {
+        console.error('Error fetching reports:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReports();
+  }, []);
+
+  // Combine API reports with dummy data (keep two dummy)
+  const allReports = useMemo(() => {
+    const dummyToKeep = reportsData.slice(0, 2); // Keep first two dummy
+    return [...apiReports, ...dummyToKeep];
+  }, [apiReports]);
 
   // Reset ke halaman 1 ketika search berubah
   useEffect(() => {
@@ -32,23 +68,23 @@ const LaporanPage: React.FC = () => {
   }, [searchQuery, filters]);
 
   const stats = useMemo(() => {
-    const total = reportsData.length;
-    const verified = reportsData.filter(
+    const total = allReports.length;
+    const verified = allReports.filter(
       (r) => r.status === "Diverifikasi"
     ).length;
-    const unverified = reportsData.filter(
-      (r) => r.status === "Belum Diverifikasi"
+    const unverified = allReports.filter(
+      (r) => r.status === "Menunggu Verifikasi" || r.status === "Belum Diverifikasi"
     ).length;
-    const rejected = reportsData.filter(
+    const rejected = allReports.filter(
       (r) => r.status === "Verifikasi Ditolak"
     ).length;
     return { total, verified, unverified, rejected };
-  }, []);
+  }, [allReports]);
 
   const filteredReports = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
 
-    return reportsData.filter((report) => {
+    return allReports.filter((report) => {
       // Search filter
       const matchesSearch =
         !q ||
@@ -90,7 +126,7 @@ const LaporanPage: React.FC = () => {
 
       return matchesSearch && matchesCategory && matchesStatus && matchesDate;
     });
-  }, [searchQuery, filters]);
+  }, [searchQuery, filters, allReports]);
 
   const totalPages = Math.max(
     1,

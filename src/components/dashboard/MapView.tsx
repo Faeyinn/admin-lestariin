@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import L, { type LatLngExpression } from 'leaflet';
 import { Trash2, Flame, Droplet, User } from 'lucide-react';
+import { API_ENDPOINTS } from '@/utils/apiConfig';
+import type { Report } from '@/utils/reportData';
 // Custom icon generator for Lucide icons
 const createLucideIcon = (icon: React.ReactElement, bg: string) => {
   const svg = renderToStaticMarkup(icon);
@@ -94,6 +96,47 @@ const heatmapCircles = [
 
 const MapView: React.FC = () => {
   const [selectedMarker, setSelectedMarker] = useState<number | null>(null);
+  const [apiReports, setApiReports] = useState<Report[]>([]);
+
+  // Fetch reports from API for map markers
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const token = localStorage.getItem('access_token');
+        const response = await fetch(API_ENDPOINTS.REPORTS_ALL, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setApiReports(data);
+        } else {
+          console.error('Failed to fetch reports for map');
+        }
+      } catch (error) {
+        console.error('Error fetching reports for map:', error);
+      }
+    };
+    fetchReports();
+  }, []);
+
+  // Create markers from API reports (assuming location has lat,lng or geocode)
+  const apiMarkers = apiReports.map((report) => ({
+    id: report.id,
+    type: 'report',
+    position: [-0.914 + Math.random() * 0.01, 100.464 + Math.random() * 0.01], // Placeholder, replace with actual coords
+    title: report.category,
+    description: report.description,
+    date: report.date,
+    image: report.image,
+    color: '#22c55e',
+    icon: <Trash2 size={20} />,
+  }));
+
+  // Combine API markers with dummy markers
+  const allMarkers = [...markerData, ...apiMarkers];
 
   return (
     <div className="relative w-full h-full rounded-2xl overflow-hidden">
@@ -120,7 +163,7 @@ const MapView: React.FC = () => {
         ))}
 
         {/* Markers */}
-        {markerData.map((marker) => (
+        {allMarkers.map((marker) => (
           <Marker
             key={marker.id}
             position={marker.position as LatLngExpression}
