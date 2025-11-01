@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { motion } from 'motion/react';
 import { API_ENDPOINTS } from '@/utils/apiConfig';
