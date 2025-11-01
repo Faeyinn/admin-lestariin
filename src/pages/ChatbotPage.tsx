@@ -16,9 +16,6 @@ const ChatbotPage: React.FC = () => {
         {/* Header Khusus untuk Halaman Chat */}
         <ChatHeader onMenuClick={() => setSidebarOpen(true)} />
 
-        {/* Main dibuat 'overflow-hidden' agar tidak ada scroll.
-          Scrolling akan ditangani di dalam ChatInterface.
-        */}
         <main
           className="flex-1 overflow-hidden p-4 md:p-6"
           data-aos="fade-in"
