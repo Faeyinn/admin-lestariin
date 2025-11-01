@@ -20,7 +20,7 @@ const menuItems = [
   { icon: FileText, label: 'Laporan', path: '/laporan' },
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
+const Sidebar: React.FC<SidebarProps> = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
@@ -62,7 +62,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
       </div>
       {/* Menu */}
       <nav className="flex-1 px-4 py-6">
-        {menuItems.map((item, idx) => {
+        {menuItems.map((item, _idx) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
           return (
