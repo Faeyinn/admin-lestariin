@@ -3,7 +3,7 @@ import Swal from 'sweetalert2';
 import IconSrc from '@/assets/icon.png';
 import ChatBody from './ChatBody';
 import ChatInput from './ChatInput';
-import { API_ENDPOINTS } from '@/utils/apiConfig';
+import { API_ENDPOINTS, GEMINI_API_URL, GEMINI_API_KEY } from '@/utils/apiConfig';
 
 // Definisikan tipe untuk pesan
 export interface Message {
@@ -94,21 +94,26 @@ const ChatInterface: React.FC = () => {
         return;
       }
 
-      console.log('Sending request to:', API_ENDPOINTS.CHATBOT);
-      console.log('Request headers:', {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
+      console.log('Sending request to Gemini API:', GEMINI_API_URL);
+      console.log('Request body:', {
+          contents: [{
+            parts: [{
+              text: `You are Toto, a helpful chatbot assistant for Lestari.in, an environmental monitoring platform focused on environmental health and sustainability. You help users with information about environmental reports, waste management, water quality, and environmental issues. Always respond in Indonesian language and be friendly and informative. User message: ${text}`
+            }]
+          }]
       });
-      console.log('Request body:', { message: text });
 
-      const response = await fetch(API_ENDPOINTS.CHATBOT, {
+      const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: text,
+          contents: [{
+            parts: [{
+              text: `You are Toto, a helpful chatbot assistant for Lestari.in, an environmental monitoring platform focused on environmental health and sustainability. You help users with information about environmental reports, waste management, water quality, and environmental issues. Always respond in Indonesian language and be friendly and informative. User message: ${text}`
+            }]
+          }]
         }),
       });
 
@@ -119,77 +124,18 @@ const ChatInterface: React.FC = () => {
       console.log('Response data:', data);
 
       if (response.ok) {
-        // Tambahkan pesan bot dari API
+        // Tambahkan pesan bot dari Gemini API
+        const botText = data.candidates?.[0]?.content?.parts?.[0]?.text ||
+                       'Maaf, saya tidak dapat memproses pesan Anda saat ini.';
         const botMessage: Message = {
           id: Date.now() + 1,
-          text: data.response || data.message || 'Maaf, saya tidak dapat memproses pesan Anda saat ini.',
-          sender: 'bot',
-        };
-        setMessages((prev) => [...prev, botMessage]);
-      } else if (response.status === 401) {
-        // Token invalid atau expired, coba refresh
-        console.log('Token expired or invalid, attempting refresh');
-        const newToken = await refreshToken();
-        if (newToken) {
-          // Retry request dengan token baru
-          const retryResponse = await fetch(API_ENDPOINTS.CHATBOT, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${newToken}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              message: text,
-            }),
-          });
-
-          const retryData = await retryResponse.json();
-
-          if (retryResponse.ok) {
-            const botMessage: Message = {
-              id: Date.now() + 1,
-              text: retryData.response || retryData.message || 'Maaf, saya tidak dapat memproses pesan Anda saat ini.',
-              sender: 'bot',
-            };
-            setMessages((prev) => [...prev, botMessage]);
-          } else {
-            // Refresh berhasil tapi retry gagal
-            console.log('Retry failed after refresh');
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
-            localStorage.removeItem('isAuthenticated');
-            const botMessage: Message = {
-              id: Date.now() + 1,
-              text: 'Sesi login Anda telah berakhir. Silakan login kembali.',
-              sender: 'bot',
-            };
-            setMessages((prev) => [...prev, botMessage]);
-          }
-        } else {
-          // Refresh gagal
-          console.log('Token refresh failed, clearing localStorage');
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-          localStorage.removeItem('isAuthenticated');
-          const botMessage: Message = {
-            id: Date.now() + 1,
-            text: 'Sesi login Anda telah berakhir. Silakan login kembali.',
-            sender: 'bot',
-          };
-          setMessages((prev) => [...prev, botMessage]);
-        }
-      } else if (response.status === 403) {
-        // Forbidden - mungkin token tidak memiliki permission
-        console.log('Forbidden access, token might not have permission');
-        const botMessage: Message = {
-          id: Date.now() + 1,
-          text: 'Anda tidak memiliki izin untuk mengakses fitur ini.',
+          text: botText,
           sender: 'bot',
         };
         setMessages((prev) => [...prev, botMessage]);
       } else {
-        // Handle API error lainnya
-        const errorMessage = data.detail || data.message || 'Terjadi kesalahan saat memproses pesan.';
+        // Handle API error
+        const errorMessage = data.error?.message || 'Terjadi kesalahan saat memproses pesan.';
         const botMessage: Message = {
           id: Date.now() + 1,
           text: `Maaf, ${errorMessage}`,
