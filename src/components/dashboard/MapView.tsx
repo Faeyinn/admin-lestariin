@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
-import L, { LatLngExpression } from 'leaflet';
+import L, { type LatLngExpression } from 'leaflet';
 import { Trash2, Flame, Droplet, User } from 'lucide-react';
-
 // Custom icon generator for Lucide icons
-const createLucideIcon = (icon: React.ReactElement, bg: string) =>
-  L.divIcon({
+const createLucideIcon = (icon: React.ReactElement, bg: string) => {
+  const svg = renderToStaticMarkup(icon);
+  return L.divIcon({
     html: `<div style="background:${bg};border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;">
-      <span style="color:white;display:flex;align-items:center;justify-content:center;">${icon.props.children}</span>
+      ${svg}
     </div>`,
     className: '',
     iconSize: [36, 36],
     iconAnchor: [18, 18],
     popupAnchor: [0, -18],
   });
+};
 
 const markerData = [
   {
@@ -130,7 +132,9 @@ const MapView: React.FC = () => {
             {selectedMarker === marker.id && (
               <Popup
                 closeButton={true}
-                onClose={() => setSelectedMarker(null)}
+                eventHandlers={{
+                  remove: () => setSelectedMarker(null),
+                }}
                 minWidth={180}
                 maxWidth={220}
               >

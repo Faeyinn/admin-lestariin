@@ -1,5 +1,6 @@
 import React from 'react';
 import { type LucideIcon } from 'lucide-react';
+import BgStat from '@/assets/bg-stat-card.png';
 
 interface StatCardProps {
   title: string;
@@ -18,13 +19,6 @@ const StatCard: React.FC<StatCardProps> = ({
   color,
   delay = 0
 }) => {
-  const colorClasses: { [key: string]: string } = {
-    green: 'from-green-400 to-green-600',
-    blue: 'from-blue-400 to-blue-600',
-    cyan: 'from-cyan-400 to-cyan-600',
-    orange: 'from-orange-400 to-orange-600',
-    red: 'from-red-400 to-red-600',
-  };
 
   const iconColorClasses: { [key: string]: string } = {
     green: 'text-green-800',
@@ -38,20 +32,26 @@ const StatCard: React.FC<StatCardProps> = ({
 
   return (
     <div
-      className={`bg-linear-to-br ${colorClasses[color]} rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all cursor-pointer`}
+      className={`rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all cursor-pointer bg-cover bg-center`}
+      style={{ backgroundImage: `url(${BgStat})` }}
       data-aos="fade-up"
       data-aos-delay={delay}
     >
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <p className="text-sm opacity-90">{subtitle}</p>
-          <h3 className="text-lg font-semibold">{title}</h3>
+      {/* subtle overlay using color to keep readable text */}
+      <div className="absolute inset-0 rounded-2xl" style={{ background: 'rgba(16, 185, 129, 0.25)' }} />
+
+      <div className="relative z-10">
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <p className="text-sm opacity-90">{subtitle}</p>
+            <h3 className="text-lg font-semibold">{title}</h3>
+          </div>
+          <div className="bg-white bg-opacity-20 p-3 rounded-xl flex items-center justify-center">
+            <Icon size={24} className={`${iconColorClass}`} />
+          </div>
         </div>
-        <div className="bg-white bg-opacity-20 p-3 rounded-xl flex items-center justify-center">
-          <Icon size={24} className={`${iconColorClass}`} />
-        </div>
+        <p className="text-4xl font-bold">{value}</p>
       </div>
-      <p className="text-4xl font-bold">{value}</p>
     </div>
   );
 };

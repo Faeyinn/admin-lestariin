@@ -25,7 +25,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
         <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
           <img src={IconSrc} alt="Lestari.in" className="w-10 h-10 object-contain" />
         </div>
-        <span className="text-2xl font-bold">Lestar.in</span>
+        <span className="text-2xl font-bold">Lestari.in</span>
       </div>
       {/* Menu */}
       <nav className="flex-1 px-4 py-6">

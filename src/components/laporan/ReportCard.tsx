@@ -1,5 +1,5 @@
 import React from 'react';
-import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 
 interface ReportCardProps {
   id: number;
@@ -26,6 +26,8 @@ const ReportCard: React.FC<ReportCardProps> = ({
   date,
   delay = 0,
 }) => {
+  const navigate = useNavigate(); // Hook untuk navigasi
+
   const getCategoryColor = (cat: string) => {
     switch (cat.toLowerCase()) {
       case 'sampah':
@@ -45,53 +47,17 @@ const ReportCard: React.FC<ReportCardProps> = ({
     return 'bg-gray-100 text-gray-700';
   };
 
-  const handleVerifikasi = () => {
-    Swal.fire({
-      title: 'Verifikasi Laporan',
-      text: `Apakah Anda yakin ingin memverifikasi laporan ini?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#22c55e',
-      cancelButtonColor: '#6b7280',
-      confirmButtonText: 'Ya, Verifikasi!',
-      cancelButtonText: 'Batal',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire({
-          title: 'Terverifikasi!',
-          text: 'Laporan berhasil diverifikasi.',
-          icon: 'success',
-          confirmButtonColor: '#22c55e',
-        });
-      }
-    });
+  // Fungsi untuk navigasi ke halaman detail
+  const handleNavigate = () => {
+    navigate(`/laporan/${id}`); // Menggunakan ID laporan untuk rute
   };
 
-  const handleTolak = () => {
-    Swal.fire({
-      title: 'Tolak Laporan',
-      text: 'Apakah Anda yakin ingin menolak laporan ini?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#6b7280',
-      confirmButtonText: 'Ya, Tolak!',
-      cancelButtonText: 'Batal',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire({
-          title: 'Ditolak!',
-          text: 'Laporan telah ditolak.',
-          icon: 'error',
-          confirmButtonColor: '#ef4444',
-        });
-      }
-    });
-  };
+  // handleVerifikasi dan handleTolak dihapus karena pindah ke halaman detail
 
   return (
     <div
-      className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow p-4 mb-4"
+      onClick={handleNavigate} // Tambahkan onClick di sini
+      className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow p-4 mb-4 cursor-pointer" // Tambahkan cursor-pointer
       data-aos="fade-up"
       data-aos-delay={delay}
     >
@@ -147,21 +113,7 @@ const ReportCard: React.FC<ReportCardProps> = ({
             </p>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={handleVerifikasi}
-              className="flex-1 sm:flex-none px-6 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors"
-            >
-              Verifikasi
-            </button>
-            <button
-              onClick={handleTolak}
-              className="flex-1 sm:flex-none px-6 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition-colors"
-            >
-              Tolak
-            </button>
-          </div>
+          {/* Action Buttons dihapus dari sini */}
         </div>
       </div>
     </div>

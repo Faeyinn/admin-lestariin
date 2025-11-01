@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { FileText, Trash2, Droplet, Axe, Flame, MessageSquare } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/dashboard/Header';
@@ -103,10 +104,10 @@ const DashboardPage: React.FC = () => {
         </main>
 
         {/* Floating Chatbot Button - Kanan Bawah */}
-        <button className="fixed bottom-6 right-6 z-50 p-4 bg-green-500 hover:bg-green-600 rounded-full shadow-2xl hover:shadow-3xl transition-all transform hover:scale-110">
+        <Link to='/chatbot' className="fixed bottom-6 right-6 z-50 p-4 bg-green-500 hover:bg-green-600 rounded-full shadow-2xl hover:shadow-3xl transition-all transform hover:scale-110">
           <MessageSquare size={28} className="text-white" />
           <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-        </button>
+        </Link>
       </div>
     </div>
   );

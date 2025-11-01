@@ -9,6 +9,8 @@ import Index from "./pages/index"
 import LoginPage from "./pages/LoginPage"
 import DashboardPage from "./pages/DashboardPage"
 import LaporanPage from "./pages/LaporanPage"
+import DetailLaporanPage from "./pages/DetailLaporan"
+import ChatbotPage from "./pages/ChatbotPage"
 
 export default function App() {
   useEffect(() => {
@@ -27,6 +29,9 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/laporan" element={<LaporanPage />} />
+        <Route path="/laporan/:id" element={<DetailLaporanPage />} /> 
+        <Route path="/chatbot" element={<ChatbotPage />} />
+        
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>

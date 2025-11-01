@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { FileText, CheckCircle, Clock, XCircle, MessageSquare } from "lucide-react";
 import Swal from "sweetalert2";
 import Sidebar from "@/components/Sidebar";
@@ -9,7 +10,7 @@ import Pagination from "@/components/laporan/Pagination";
 import FilterModal, {
   type FilterState,
 } from "@/components/laporan/FilterModal";
-import { reportsData, type Report } from "@/utils/reportData";
+import { reportsData } from "@/utils/reportData";
 
 const LaporanPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -25,9 +26,10 @@ const LaporanPage: React.FC = () => {
 
   const itemsPerPage = 10;
 
+  // Reset ke halaman 1 ketika search berubah
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, filters]);
 
   const stats = useMemo(() => {
     const total = reportsData.length;
@@ -47,23 +49,23 @@ const LaporanPage: React.FC = () => {
     const q = searchQuery.trim().toLowerCase();
 
     return reportsData.filter((report) => {
-      // Search filter - hanya aktif jika ada query
+      // Search filter
       const matchesSearch =
         !q ||
-        (report.category || "").toLowerCase().includes(q) ||
-        (report.location || "").toLowerCase().includes(q) ||
-        (report.description || "").toLowerCase().includes(q) ||
-        (report.author || "").toLowerCase().includes(q) ||
-        (report.tags || []).some((tag) => tag.toLowerCase().includes(q));
+        report.category.toLowerCase().includes(q) ||
+        report.location.toLowerCase().includes(q) ||
+        report.description.toLowerCase().includes(q) ||
+        report.author.toLowerCase().includes(q) ||
+        report.tags.some((tag) => tag.toLowerCase().includes(q));
 
-      // Category filter - hanya aktif jika dipilih
+      // Category filter
       const matchesCategory =
         !filters.category || report.category === filters.category;
 
-      // Status filter - hanya aktif jika dipilih
+      // Status filter
       const matchesStatus = !filters.status || report.status === filters.status;
 
-      // Date filtering - hanya aktif jika dipilih
+      // Date filtering
       let matchesDate = true;
       if (filters.dateFrom || filters.dateTo) {
         try {
@@ -80,9 +82,8 @@ const LaporanPage: React.FC = () => {
             to.setHours(23, 59, 59, 999);
             matchesDate = matchesDate && rDate <= to;
           }
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (e) {
-          // Jika parsing gagal, abaikan filter tanggal
           matchesDate = true;
         }
       }
@@ -96,18 +97,14 @@ const LaporanPage: React.FC = () => {
     Math.ceil(filteredReports.length / itemsPerPage)
   );
 
-  useEffect(() => {
-    if (currentPage > totalPages) setCurrentPage(1);
-  }, [currentPage, totalPages]);
-
-  const paginatedReports = filteredReports.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const paginatedReports = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredReports.slice(startIndex, endIndex);
+  }, [filteredReports, currentPage, itemsPerPage]);
 
   const handleFilterApply = (newFilters: FilterState) => {
     setFilters(newFilters);
-    setCurrentPage(1);
   };
 
   const handleExport = () => {
@@ -181,25 +178,18 @@ const LaporanPage: React.FC = () => {
     <div className="flex h-screen bg-gradient-to-br from-green-50 via-cyan-50 to-blue-50 overflow-hidden">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      {/* main area with left margin so floating sidebar doesn't overlap */}
       <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-[calc(18rem+1.5rem)]">
         <ReportHeader
           onMenuClick={() => setSidebarOpen(true)}
-          onFilterClick={function (): void {
-            throw new Error("Function not implemented.");
-          }}
-          onExportClick={function (): void {
-            throw new Error("Function not implemented.");
-          }}
-          searchQuery={""}
-          onSearchChange={function (): void {
-            throw new Error("Function not implemented.");
-          }}
+          onFilterClick={() => setFilterOpen(true)}
+          onExportClick={handleExport}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
         />
 
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
           <div className="w-full">
-            {/* STAT CARDS - full width (span to right), sticky so always visible on scroll */}
+            {/* STAT CARDS */}
             <div className="w-full mb-6">
               <div
                 className="w-full lg:sticky lg:top-20 z-40 bg-transparent py-2"
@@ -221,6 +211,7 @@ const LaporanPage: React.FC = () => {
               </div>
             </div>
 
+            {/* MAIN CONTENT GRID */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               {/* Reports column (3/4) */}
               <div className="lg:col-span-3 space-y-6">
@@ -257,7 +248,7 @@ const LaporanPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Right tools panel (1/4) - placed under stat cards and sticky */}
+              {/* Right tools panel (1/4) */}
               <aside className="lg:col-span-1">
                 <div className="lg:sticky lg:top-28 space-y-4">
                   {/* Search / Filter / Export */}
@@ -335,9 +326,11 @@ const LaporanPage: React.FC = () => {
                   <div className="bg-white rounded-2xl shadow-lg p-4">
                     <h3 className="text-sm text-gray-600 mb-2">Ringkasan</h3>
                     <div className="text-lg font-bold">
-                      {stats.total} laporan
+                      {filteredReports.length} laporan
                     </div>
                     <div className="mt-3 text-sm text-gray-500">
+                      Total: {stats.total}
+                      <br />
                       Diverifikasi: {stats.verified}
                       <br />
                       Menunggu: {stats.unverified}
@@ -350,12 +343,14 @@ const LaporanPage: React.FC = () => {
             </div>
           </div>
         </main>
-
         {/* Floating Chatbot Button - Kanan Bawah */}
-        <button className="fixed bottom-6 right-6 z-50 p-4 bg-green-500 hover:bg-green-600 rounded-full shadow-2xl hover:shadow-3xl transition-all transform hover:scale-110">
+        <Link
+          to="/chatbot"
+          className="fixed bottom-6 right-6 z-50 p-4 bg-green-500 hover:bg-green-600 rounded-full shadow-2xl hover:shadow-3xl transition-all transform hover:scale-110"
+        >
           <MessageSquare size={28} className="text-white" />
           <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-        </button>
+        </Link>
       </div>
 
       <FilterModal
