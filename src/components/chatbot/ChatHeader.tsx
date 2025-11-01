@@ -1,11 +1,20 @@
 import React from 'react';
 import { User, Menu } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { logout } from '@/utils/auth';
 
 interface ChatHeaderProps {
   onMenuClick: () => void;
 }
 
 const ChatHeader: React.FC<ChatHeaderProps> = ({ onMenuClick }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
+
   return (
     <header className="bg-gradient-to-r from-green-50 to-cyan-50 p-4 sticky top-0 z-30 shadow-sm">
       <div className="flex items-center justify-between gap-4">
@@ -32,7 +41,10 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ onMenuClick }) => {
               Admin
             </span>
           </div>
-          <button className="hidden lg:block p-2.5 bg-white rounded-full shadow-lg hover:shadow-xl transition-all hover:bg-red-50">
+          <button 
+            onClick={handleLogout}
+            className="hidden lg:block p-2.5 bg-white rounded-full shadow-lg hover:shadow-xl transition-all hover:bg-red-50"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="22"

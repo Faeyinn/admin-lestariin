@@ -1,6 +1,7 @@
 import React from 'react';
 import { LayoutDashboard, FileText, LogOut } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { logout } from '@/utils/auth';
 import IconSrc from '@/assets/icon.png';
 
 interface SidebarProps {
@@ -13,9 +14,14 @@ const menuItems = [
   { icon: FileText, label: 'Laporan', path: '/laporan' },
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
+const Sidebar: React.FC<SidebarProps> = () => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
 
   return (
     // floating sidebar: fixed with offset from left/top, rounded, heavy shadow
@@ -29,7 +35,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
       </div>
       {/* Menu */}
       <nav className="flex-1 px-4 py-6">
-        {menuItems.map((item, idx) => {
+        {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
           return (
@@ -51,10 +57,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
       {/* Logout */}
       <div className="p-4 mt-auto">
         <button
-          onClick={() => {
-            localStorage.removeItem('isAuthenticated');
-            window.location.href = '/';
-          }}
+          onClick={handleLogout}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white hover:bg-red-600 transition-all"
         >
           <LogOut size={22} />

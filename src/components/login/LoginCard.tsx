@@ -4,6 +4,7 @@ import { InputField } from './InputField';
 import { Button } from './Button';
 import { GoogleSignInButton } from './GoogleSignInButton';
 import { useNavigate } from 'react-router-dom';
+import { login } from '@/utils/auth';
 
 export const LoginCard: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -30,8 +31,8 @@ export const LoginCard: React.FC = () => {
       timer: 1000,
       showConfirmButton: false,
       willClose: () => {
-        // optional: set a dummy auth flag
-        localStorage.setItem('isAuthenticated', 'true');
+        // Set auth status menggunakan utility function
+        login();
         navigate('/dashboard', { replace: true });
       }
     });

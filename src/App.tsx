@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import ScrollToTop from "./components/ScrollToTop"
+import ProtectedRoute from "./components/ProtectedRoute"
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import 'leaflet/dist/leaflet.css';
@@ -27,10 +28,38 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/laporan" element={<LaporanPage />} />
-        <Route path="/laporan/:id" element={<DetailLaporanPage />} /> 
-        <Route path="/chatbot" element={<ChatbotPage />} />
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/laporan" 
+          element={
+            <ProtectedRoute>
+              <LaporanPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/laporan/:id" 
+          element={
+            <ProtectedRoute>
+              <DetailLaporanPage />
+            </ProtectedRoute>
+          } 
+        /> 
+        <Route 
+          path="/chatbot" 
+          element={
+            <ProtectedRoute>
+              <ChatbotPage />
+            </ProtectedRoute>
+          } 
+        />
         
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
