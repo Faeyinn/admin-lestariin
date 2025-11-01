@@ -1,5 +1,6 @@
 import React from 'react';
 import { type LucideIcon } from 'lucide-react';
+import { motion } from 'framer-motion';
 import BgStat from '@/assets/bg-stat-card.png';
 
 interface StatCardProps {
@@ -31,11 +32,13 @@ const StatCard: React.FC<StatCardProps> = ({
   const iconColorClass = iconColorClasses[color] ?? 'text-green-800';
 
   return (
-    <div
-      className={`rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all cursor-pointer bg-cover bg-center`}
+    <motion.div
+      className={`rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all cursor-pointer bg-cover bg-center relative`}
       style={{ backgroundImage: `url(${BgStat})` }}
-      data-aos="fade-up"
-      data-aos-delay={delay}
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.6, delay: (delay ?? 0) / 1000 }}
     >
       {/* subtle overlay using color to keep readable text */}
       <div className="absolute inset-0 rounded-2xl" style={{ background: 'rgba(16, 185, 129, 0.25)' }} />
@@ -52,7 +55,7 @@ const StatCard: React.FC<StatCardProps> = ({
         </div>
         <p className="text-4xl font-bold">{value}</p>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

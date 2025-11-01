@@ -1,5 +1,5 @@
 // API Configuration
-export const API_BASE_URL = 'https://1ebea768a613.ngrok-free.app';
+export const API_BASE_URL = 'https://6839d2caeb60.ngrok-free.app/';
 
 // Gemini API Configuration
 export const GEMINI_API_KEY = 'AIzaSyC94uxPEVP-YTthUIafedlZ6uqUZ_NhUOY';

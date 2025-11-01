@@ -33,7 +33,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled = false }) => {
         />
         <button
           type="submit"
-          className="flex-shrink-0 w-12 h-12 bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center justify-center transition-colors shadow-lg"
+          className="shrink-0 w-12 h-12 bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center justify-center transition-colors shadow-lg"
         >
           <Send size={20} />
         </button>

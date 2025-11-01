@@ -8,6 +8,7 @@ import {
   Area,
   AreaChart,
 } from "recharts";
+import { motion } from "motion/react";
 
 const ChartCard: React.FC = () => {
   const data = [
@@ -63,11 +64,12 @@ const ChartCard: React.FC = () => {
   ];
 
   return (
-    // set explicit height so ResponsiveContainer can compute layout
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.6, delay: 0.4 }}
       className="bg-white rounded-2xl shadow-lg p-6 h-64 md:h-80"
-      data-aos="fade-up"
-      data-aos-delay="400"
     >
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
@@ -141,7 +143,7 @@ const ChartCard: React.FC = () => {
           />
         </AreaChart>
       </ResponsiveContainer>
-    </div>
+    </motion.div>
   );
 };
 

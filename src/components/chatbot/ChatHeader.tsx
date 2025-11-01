@@ -16,7 +16,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ onMenuClick }) => {
   };
 
   return (
-    <header className="bg-gradient-to-r from-green-50 to-cyan-50 p-4 sticky top-0 z-30 shadow-sm">
+    <header className="bg-linear-to-r from-green-50 to-cyan-50 p-4 sticky top-0 z-30 shadow-sm">
       <div className="flex items-center justify-between gap-4">
         {/* Sisi Kiri: Tombol Menu (Mobile) & Judul "Chat" */}
         <div className="flex items-center gap-4">
@@ -34,7 +34,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ onMenuClick }) => {
         {/* Sisi Kanan: Profil Admin & Logout */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-lg cursor-pointer hover:shadow-xl transition-all">
-            <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-linear-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
               <User size={20} className="text-white" />
             </div>
             <span className="hidden md:block font-semibold text-gray-800">
