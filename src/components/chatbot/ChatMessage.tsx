@@ -20,7 +20,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, delay = 0 }) => {
     >
       {/* Avatar Bot */}
       {!isUser && (
-        <div className="flex-shrink-0 w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-200">
+        <div className="shrink-0 w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-200">
           <img src={IconSrc} alt="Bot" className="w-8 h-8 object-contain" />
         </div>
       )}
@@ -38,7 +38,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, delay = 0 }) => {
 
       {/* Avatar User */}
       {isUser && (
-        <div className="flex-shrink-0 w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center border border-gray-300">
+        <div className="shrink-0 w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center border border-gray-300">
           <User size={20} className="text-gray-600" />
         </div>
       )}

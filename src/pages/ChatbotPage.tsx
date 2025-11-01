@@ -19,7 +19,6 @@ const ChatbotPage: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-green-50 via-cyan-50 to-blue-50 overflow-hidden">
-      {/* Sidebar (dari komponen Tuan yang ada) */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Konten Utama */}
