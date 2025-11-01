@@ -1,10 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '@/components/Sidebar';
 import ChatHeader from '@/components/chatbot/ChatHeader';
 import ChatInterface from '@/components/chatbot/ChatInterface';
 
 const ChatbotPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    const isAuthenticated = localStorage.getItem('isAuthenticated');
+
+    if (!token || !isAuthenticated) {
+      navigate('/login', { replace: true });
+    }
+  }, [navigate]);
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-green-50 via-cyan-50 to-blue-50 overflow-hidden">

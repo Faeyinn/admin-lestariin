@@ -4,14 +4,16 @@ import { InputField } from './InputField';
 import { Button } from './Button';
 import { GoogleSignInButton } from './GoogleSignInButton';
 import { useNavigate } from 'react-router-dom';
+import { API_ENDPOINTS } from '@/utils/apiConfig';
 
 export const LoginCard: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       Swal.fire({
         icon: 'error',
@@ -22,19 +24,58 @@ export const LoginCard: React.FC = () => {
       return;
     }
 
-    Swal.fire({
-      icon: 'success',
-      title: 'Login Successful!',
-      text: 'Welcome back!',
-      confirmButtonColor: '#0f766e',
-      timer: 1000,
-      showConfirmButton: false,
-      willClose: () => {
-        // optional: set a dummy auth flag
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(API_ENDPOINTS.ADMIN_LOGIN, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Simpan access_token dan refresh_token di localStorage
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('refresh_token', data.refresh_token);
         localStorage.setItem('isAuthenticated', 'true');
-        navigate('/dashboard', { replace: true });
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Login Successful!',
+          text: 'Welcome back!',
+          confirmButtonColor: '#0f766e',
+          timer: 1000,
+          showConfirmButton: false,
+          willClose: () => {
+            navigate('/dashboard', { replace: true });
+          }
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Login Failed',
+          text: data.detail || 'Invalid credentials',
+          confirmButtonColor: '#0f766e'
+        });
       }
-    });
+    } catch (error) {
+      console.error('Login error:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Connection Error',
+        text: 'Unable to connect to server. Please try again.',
+        confirmButtonColor: '#0f766e'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleForgotPassword = () => {
@@ -125,8 +166,8 @@ export const LoginCard: React.FC = () => {
           </button>
         </div>
 
-        <Button onClick={handleLogin} variant="primary" className="mb-4">
-          Login
+        <Button onClick={handleLogin} variant="primary" className="mb-4" disabled={isLoading}>
+          {isLoading ? 'Logging in...' : 'Login'}
         </Button>
       </div>
 

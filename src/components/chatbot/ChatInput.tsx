@@ -3,15 +3,16 @@ import { Send } from 'lucide-react';
 
 interface ChatInputProps {
   onSend: (text: string) => void;
+  disabled?: boolean;
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
+const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled = false }) => {
   const [text, setText] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const message = text.trim();
-    if (message) {
+    if (message && !disabled) {
       onSend(message);
       setText('');
     }

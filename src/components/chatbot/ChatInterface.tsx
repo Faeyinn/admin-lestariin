@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import Swal from 'sweetalert2';
 import IconSrc from '@/assets/icon.png';
 import ChatBody from './ChatBody';
 import ChatInput from './ChatInput';
+import { API_ENDPOINTS } from '@/utils/apiConfig';
 
 // Definisikan tipe untuk pesan
 export interface Message {
@@ -31,8 +33,39 @@ const initialMessages: Message[] = [
 
 const ChatInterface: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSend = (text: string) => {
+  const refreshToken = async (): Promise<string | null> => {
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (!refreshToken) return null;
+
+    try {
+      const response = await fetch(API_ENDPOINTS.TOKEN_REFRESH, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          refresh: refreshToken,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem('access_token', data.access);
+        return data.access;
+      } else {
+        console.log('Token refresh failed:', data);
+        return null;
+      }
+    } catch (error) {
+      console.error('Token refresh error:', error);
+      return null;
+    }
+  };
+
+  const handleSend = async (text: string) => {
     // 1. Tambahkan pesan user
     const userMessage: Message = {
       id: Date.now(),
@@ -41,15 +74,140 @@ const ChatInterface: React.FC = () => {
     };
     setMessages((prev) => [...prev, userMessage]);
 
-    // 2. Simulasi jawaban bot
-    setTimeout(() => {
+    setIsLoading(true);
+
+    try {
+      const token = localStorage.getItem('access_token');
+      const isAuthenticated = localStorage.getItem('isAuthenticated');
+
+      console.log('Token from localStorage:', token);
+      console.log('Is authenticated:', isAuthenticated);
+
+      if (!token || !isAuthenticated) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Authentication Error',
+          text: 'Please login first to use the chatbot.',
+          confirmButtonColor: '#0f766e'
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      console.log('Sending request to:', API_ENDPOINTS.CHATBOT);
+      console.log('Request headers:', {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      });
+      console.log('Request body:', { message: text });
+
+      const response = await fetch(API_ENDPOINTS.CHATBOT, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: text,
+        }),
+      });
+
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+      const data = await response.json();
+      console.log('Response data:', data);
+
+      if (response.ok) {
+        // Tambahkan pesan bot dari API
+        const botMessage: Message = {
+          id: Date.now() + 1,
+          text: data.response || data.message || 'Maaf, saya tidak dapat memproses pesan Anda saat ini.',
+          sender: 'bot',
+        };
+        setMessages((prev) => [...prev, botMessage]);
+      } else if (response.status === 401) {
+        // Token invalid atau expired, coba refresh
+        console.log('Token expired or invalid, attempting refresh');
+        const newToken = await refreshToken();
+        if (newToken) {
+          // Retry request dengan token baru
+          const retryResponse = await fetch(API_ENDPOINTS.CHATBOT, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${newToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              message: text,
+            }),
+          });
+
+          const retryData = await retryResponse.json();
+
+          if (retryResponse.ok) {
+            const botMessage: Message = {
+              id: Date.now() + 1,
+              text: retryData.response || retryData.message || 'Maaf, saya tidak dapat memproses pesan Anda saat ini.',
+              sender: 'bot',
+            };
+            setMessages((prev) => [...prev, botMessage]);
+          } else {
+            // Refresh berhasil tapi retry gagal
+            console.log('Retry failed after refresh');
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('isAuthenticated');
+            const botMessage: Message = {
+              id: Date.now() + 1,
+              text: 'Sesi login Anda telah berakhir. Silakan login kembali.',
+              sender: 'bot',
+            };
+            setMessages((prev) => [...prev, botMessage]);
+          }
+        } else {
+          // Refresh gagal
+          console.log('Token refresh failed, clearing localStorage');
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          localStorage.removeItem('isAuthenticated');
+          const botMessage: Message = {
+            id: Date.now() + 1,
+            text: 'Sesi login Anda telah berakhir. Silakan login kembali.',
+            sender: 'bot',
+          };
+          setMessages((prev) => [...prev, botMessage]);
+        }
+      } else if (response.status === 403) {
+        // Forbidden - mungkin token tidak memiliki permission
+        console.log('Forbidden access, token might not have permission');
+        const botMessage: Message = {
+          id: Date.now() + 1,
+          text: 'Anda tidak memiliki izin untuk mengakses fitur ini.',
+          sender: 'bot',
+        };
+        setMessages((prev) => [...prev, botMessage]);
+      } else {
+        // Handle API error lainnya
+        const errorMessage = data.detail || data.message || 'Terjadi kesalahan saat memproses pesan.';
+        const botMessage: Message = {
+          id: Date.now() + 1,
+          text: `Maaf, ${errorMessage}`,
+          sender: 'bot',
+        };
+        setMessages((prev) => [...prev, botMessage]);
+      }
+    } catch (error) {
+      console.error('Chatbot error:', error);
       const botMessage: Message = {
         id: Date.now() + 1,
-        text: 'Ini adalah jawaban otomatis dari bot. Fitur ini sedang dalam pengembangan.',
+        text: 'Maaf, terjadi kesalahan koneksi. Silakan coba lagi.',
         sender: 'bot',
       };
       setMessages((prev) => [...prev, botMessage]);
-    }, 1000);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -66,7 +224,7 @@ const ChatInterface: React.FC = () => {
       <ChatBody messages={messages} />
 
       {/* Input Chat */}
-      <ChatInput onSend={handleSend} />
+      <ChatInput onSend={handleSend} disabled={isLoading} />
     </div>
   );
 };

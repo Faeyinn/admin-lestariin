@@ -1,11 +1,20 @@
 import React from 'react';
-import { User, Menu } from 'lucide-react';
+import { User, Menu, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface ChatHeaderProps {
   onMenuClick: () => void;
 }
 
 const ChatHeader: React.FC<ChatHeaderProps> = ({ onMenuClick }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('isAuthenticated');
+    navigate('/', { replace: true });
+  };
+
   return (
     <header className="bg-gradient-to-r from-green-50 to-cyan-50 p-4 sticky top-0 z-30 shadow-sm">
       <div className="flex items-center justify-between gap-4">
@@ -22,7 +31,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ onMenuClick }) => {
           </h1>
         </div>
 
-        {/* Sisi Kanan: Profil Admin & Logout (Sama seperti header Tuan) */}
+        {/* Sisi Kanan: Profil Admin & Logout */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-lg cursor-pointer hover:shadow-xl transition-all">
             <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
@@ -32,23 +41,12 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ onMenuClick }) => {
               Admin
             </span>
           </div>
-          <button className="hidden lg:block p-2.5 bg-white rounded-full shadow-lg hover:shadow-xl transition-all hover:bg-red-50">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-gray-700"
-            >
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
+          <button
+            onClick={handleLogout}
+            className="hidden lg:block p-2.5 bg-white rounded-full shadow-lg hover:shadow-xl transition-all hover:bg-red-50"
+            title="Logout"
+          >
+            <LogOut size={22} className="text-gray-700" />
           </button>
         </div>
       </div>
