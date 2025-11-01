@@ -3,7 +3,7 @@ import Swal from 'sweetalert2';
 import IconSrc from '@/assets/icon.png';
 import ChatBody from './ChatBody';
 import ChatInput from './ChatInput';
-import { API_ENDPOINTS, GEMINI_API_URL, GEMINI_API_KEY } from '@/utils/apiConfig';
+import { GEMINI_API_URL, GEMINI_API_KEY } from '@/utils/apiConfig';
 
 // Definisikan tipe untuk pesan
 export interface Message {
