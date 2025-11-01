@@ -35,7 +35,7 @@ const ChatInterface: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [isLoading, setIsLoading] = useState(false);
 
-  const refreshToken = async (): Promise<string | null> => {
+  const _refreshToken = async (): Promise<string | null> => {
     const refreshToken = localStorage.getItem('refresh_token');
     if (!refreshToken) return null;
 
