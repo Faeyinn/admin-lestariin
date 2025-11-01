@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { FileText, CheckCircle, Clock, XCircle } from "lucide-react";
+import { FileText, CheckCircle, Clock, XCircle, MessageSquare } from "lucide-react";
 import Swal from "sweetalert2";
 import Sidebar from "@/components/Sidebar";
 import ReportHeader from "@/components/laporan/ReportHeader";
@@ -46,35 +46,44 @@ const LaporanPage: React.FC = () => {
   const filteredReports = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
 
-    if (!q && !filters.category && !filters.status && !filters.dateFrom && !filters.dateTo) {
-      return reportsData.slice(); // return copy of full dataset
-    }
-
     return reportsData.filter((report) => {
+      // Search filter - hanya aktif jika ada query
       const matchesSearch =
-        q === '' ||
-        (report.category || '').toLowerCase().includes(q) ||
-        (report.location || '').toLowerCase().includes(q) ||
-        (report.description || '').toLowerCase().includes(q) ||
-        (report.author || '').toLowerCase().includes(q);
+        !q ||
+        (report.category || "").toLowerCase().includes(q) ||
+        (report.location || "").toLowerCase().includes(q) ||
+        (report.description || "").toLowerCase().includes(q) ||
+        (report.author || "").toLowerCase().includes(q) ||
+        (report.tags || []).some((tag) => tag.toLowerCase().includes(q));
 
-      const matchesCategory = !filters.category || report.category === filters.category;
+      // Category filter - hanya aktif jika dipilih
+      const matchesCategory =
+        !filters.category || report.category === filters.category;
+
+      // Status filter - hanya aktif jika dipilih
       const matchesStatus = !filters.status || report.status === filters.status;
 
-      // date filtering (if provided) --- parse safely
+      // Date filtering - hanya aktif jika dipilih
       let matchesDate = true;
-      if (filters.dateFrom) {
-        const from = new Date(filters.dateFrom);
-        const rDate = new Date(report.date);
-        if (!isNaN(from.getTime()) && !isNaN(rDate.getTime())) {
-          matchesDate = rDate >= from;
-        }
-      }
-      if (matchesDate && filters.dateTo) {
-        const to = new Date(filters.dateTo);
-        const rDate = new Date(report.date);
-        if (!isNaN(to.getTime()) && !isNaN(rDate.getTime())) {
-          matchesDate = rDate <= to;
+      if (filters.dateFrom || filters.dateTo) {
+        try {
+          const rDate = new Date(report.date);
+
+          if (filters.dateFrom) {
+            const from = new Date(filters.dateFrom);
+            from.setHours(0, 0, 0, 0);
+            matchesDate = matchesDate && rDate >= from;
+          }
+
+          if (filters.dateTo) {
+            const to = new Date(filters.dateTo);
+            to.setHours(23, 59, 59, 999);
+            matchesDate = matchesDate && rDate <= to;
+          }
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (e) {
+          // Jika parsing gagal, abaikan filter tanggal
+          matchesDate = true;
         }
       }
 
@@ -82,7 +91,10 @@ const LaporanPage: React.FC = () => {
     });
   }, [searchQuery, filters]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredReports.length / itemsPerPage));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredReports.length / itemsPerPage)
+  );
 
   useEffect(() => {
     if (currentPage > totalPages) setCurrentPage(1);
@@ -171,7 +183,19 @@ const LaporanPage: React.FC = () => {
 
       {/* main area with left margin so floating sidebar doesn't overlap */}
       <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-[calc(18rem+1.5rem)]">
-        <ReportHeader onMenuClick={() => setSidebarOpen(true)} />
+        <ReportHeader
+          onMenuClick={() => setSidebarOpen(true)}
+          onFilterClick={function (): void {
+            throw new Error("Function not implemented.");
+          }}
+          onExportClick={function (): void {
+            throw new Error("Function not implemented.");
+          }}
+          searchQuery={""}
+          onSearchChange={function (): void {
+            throw new Error("Function not implemented.");
+          }}
+        />
 
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
           <div className="w-full">
@@ -197,9 +221,6 @@ const LaporanPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Below stat cards: two-column layout - reports (left 3fr) and tools panel (right 1fr).
-                Tools panel placed under stat cards and sticky (always visible when scrolling).
-            */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               {/* Reports column (3/4) */}
               <div className="lg:col-span-3 space-y-6">
@@ -329,6 +350,12 @@ const LaporanPage: React.FC = () => {
             </div>
           </div>
         </main>
+
+        {/* Floating Chatbot Button - Kanan Bawah */}
+        <button className="fixed bottom-6 right-6 z-50 p-4 bg-green-500 hover:bg-green-600 rounded-full shadow-2xl hover:shadow-3xl transition-all transform hover:scale-110">
+          <MessageSquare size={28} className="text-white" />
+          <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+        </button>
       </div>
 
       <FilterModal
