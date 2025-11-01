@@ -1,5 +1,6 @@
 import React from 'react';
 import { type LucideIcon } from 'lucide-react';
+import { motion } from 'motion/react';
 import BgStat from '@/assets/bg-stat-card.png';
 
 interface ReportStatCardProps {
@@ -19,11 +20,13 @@ const ReportStatCard: React.FC<ReportStatCardProps> = ({
   delay = 0,
 }) => {
   return (
-    <div
+    <motion.div
       className={`rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all cursor-pointer relative overflow-hidden bg-cover bg-center`}
       style={{ backgroundImage: `url(${BgStat})` }}
-      data-aos="fade-up"
-      data-aos-delay={delay}
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.6, delay: (delay ?? 0) / 1000 }}
     >
       {/* Decorative circles */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16" />
@@ -44,7 +47,7 @@ const ReportStatCard: React.FC<ReportStatCardProps> = ({
         </div>
         <p className="text-5xl font-bold">{value}</p>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

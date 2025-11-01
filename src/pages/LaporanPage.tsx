@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FileText, CheckCircle, Clock, XCircle, MessageSquare } from "lucide-react";
+import { motion } from "motion/react";
 import Swal from "sweetalert2";
 import Sidebar from "@/components/Sidebar";
 import ReportHeader from "@/components/laporan/ReportHeader";
@@ -227,9 +228,12 @@ const LaporanPage: React.FC = () => {
           <div className="w-full">
             {/* STAT CARDS */}
             <div className="w-full mb-6">
-              <div
+              <motion.div
                 className="w-full lg:sticky lg:top-20 z-40 bg-transparent py-2"
-                data-aos="fade-down"
+                initial={{ opacity: 0, y: -8 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.5 }}
               >
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {statCards.map((stat, idx) => (
@@ -244,7 +248,7 @@ const LaporanPage: React.FC = () => {
                     />
                   ))}
                 </div>
-              </div>
+              </motion.div>
             </div>
 
             {/* MAIN CONTENT GRID */}

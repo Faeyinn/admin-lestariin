@@ -2,6 +2,7 @@ import React from 'react';
 import { User } from 'lucide-react';
 import IconSrc from '@/assets/icon.png';
 import { type Message } from '@/components/chatbot/ChatInterface';
+import { motion } from 'motion/react';
 
 interface ChatMessageProps {
   message: Message;
@@ -12,11 +13,12 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, delay = 0 }) => {
   const isUser = message.sender === 'user';
 
   return (
-    <div
+    <motion.div
       className={`flex items-end gap-3 ${isUser ? 'justify-end' : 'justify-start'}`}
-      data-aos="fade-up"
-      data-aos-delay={delay}
-      data-aos-duration="500"
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.5, delay: (delay ?? 0) / 1000 }}
     >
       {/* Avatar Bot */}
       {!isUser && (
@@ -42,7 +44,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, delay = 0 }) => {
           <User size={20} className="text-gray-600" />
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

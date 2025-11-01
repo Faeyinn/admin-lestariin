@@ -2,6 +2,7 @@ import React from 'react';
 import { type Report } from '@/utils/reportData';
 import DetailReportMap from './DetailReportMap';
 import DetailReportActions from './DetailReportActions';
+import { motion } from 'motion/react';
 
 interface DetailReportContentProps {
   report: Report;
@@ -33,9 +34,12 @@ const DetailReportContent: React.FC<DetailReportContentProps> = ({
   };
 
   return (
-    <div
+    <motion.div
       className="bg-white rounded-2xl shadow-xl p-4 md:p-6"
-      data-aos="fade-up"
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.5 }}
     >
       <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
         {/* Kolom 1: Gambar (Lebih besar di desktop) */}
@@ -107,7 +111,7 @@ const DetailReportContent: React.FC<DetailReportContentProps> = ({
           <DetailReportActions reportId={report.id} />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

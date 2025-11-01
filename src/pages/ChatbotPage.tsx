@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'motion/react';
 import Sidebar from '@/components/Sidebar';
 import ChatHeader from '@/components/chatbot/ChatHeader';
 import ChatInterface from '@/components/chatbot/ChatInterface';
@@ -26,14 +27,16 @@ const ChatbotPage: React.FC = () => {
         {/* Header Khusus untuk Halaman Chat */}
         <ChatHeader onMenuClick={() => setSidebarOpen(true)} />
 
-        <main
+        <motion.main
           className="flex-1 overflow-hidden p-4 md:p-6"
-          data-aos="fade-in"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
         >
           <div className="h-full max-w-[1600px] mx-auto">
             <ChatInterface />
           </div>
-        </main>
+        </motion.main>
       </div>
     </div>
   );

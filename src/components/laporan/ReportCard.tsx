@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'motion/react';
 
 interface ReportCardProps {
   id: number;
@@ -52,14 +53,17 @@ const ReportCard: React.FC<ReportCardProps> = ({
     navigate(`/laporan/${id}`); // Menggunakan ID laporan untuk rute
   };
 
-  // handleVerifikasi dan handleTolak dihapus karena pindah ke halaman detail
-
   return (
-    <div
-      onClick={handleNavigate} // Tambahkan onClick di sini
-      className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow p-4 mb-4 cursor-pointer" // Tambahkan cursor-pointer
-      data-aos="fade-up"
-      data-aos-delay={delay}
+    <motion.div
+      onClick={handleNavigate}
+      className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow p-4 mb-4 cursor-pointer"
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.5, delay: (delay ?? 0) / 1000 }}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter') handleNavigate(); }}
     >
       <div className="flex flex-col md:flex-row gap-4">
         {/* Image */}
@@ -116,7 +120,7 @@ const ReportCard: React.FC<ReportCardProps> = ({
           {/* Action Buttons dihapus dari sini */}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

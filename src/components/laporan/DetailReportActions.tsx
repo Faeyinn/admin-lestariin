@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { motion } from 'motion/react';
 
 interface DetailReportActionsProps {
   reportId: number;
@@ -17,7 +18,7 @@ const DetailReportActions: React.FC<DetailReportActionsProps> = ({
       text: `Apakah Anda yakin ingin memverifikasi laporan #${reportId}?`,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: '#22c55e', // Warna hijau
+      confirmButtonColor: '#22c55e',
       cancelButtonColor: '#6b7280',
       confirmButtonText: 'Ya, Verifikasi!',
       cancelButtonText: 'Batal',
@@ -39,7 +40,7 @@ const DetailReportActions: React.FC<DetailReportActionsProps> = ({
       text: `Apakah Anda yakin ingin menolak laporan #${reportId}?`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#ef4444', // Warna merah
+      confirmButtonColor: '#ef4444',
       cancelButtonColor: '#6b7280',
       confirmButtonText: 'Ya, Tolak!',
       cancelButtonText: 'Batal',
@@ -56,10 +57,12 @@ const DetailReportActions: React.FC<DetailReportActionsProps> = ({
   };
 
   return (
-    <div
-      className="flex flex-col gap-3 lg:sticky lg:top-28" // Dibuat sticky di desktop
-      data-aos="fade-up"
-      data-aos-delay="200"
+    <motion.div
+      className="flex flex-col gap-3 lg:sticky lg:top-28"
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.5, delay: 0.2 }}
     >
       <button
         onClick={() => navigate('/laporan')}
@@ -79,7 +82,7 @@ const DetailReportActions: React.FC<DetailReportActionsProps> = ({
       >
         Tolak
       </button>
-    </div>
+    </motion.div>
   );
 };
 
